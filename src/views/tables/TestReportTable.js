@@ -34,10 +34,11 @@ const TestReportTable = () => {
   const [testReportData, setTestReportData] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     // Fetch data from Laravel API
-    axios.get('http://127.0.0.1:8000/api/testreports/')
+    axios.get(`${apiUrl}/testreports/`)
       .then(response => setTestReportData(response.data))
       .catch(error => console.error('Error fetching data from Laravel API', error));
   }, []);

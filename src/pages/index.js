@@ -65,13 +65,19 @@ const LoginPage = () => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+// For example, in a component file
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+// Now, you can use apiUrl in your component as needed
+console.log(apiUrl);
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/api/login/', {
+      const response = await axios.post(`${apiUrl}/api/login/`, {
         username: values.username,
         password: values.password,
       });
+      
 
       // Assuming the server returns a token upon successful login
       const token = response.data.access;
@@ -112,11 +118,32 @@ const LoginPage = () => {
     setOpenSnackbar(false);
   };
   return (
-    
+
     <Box className='content-center'>
       <Card sx={{ zIndex: 1 }}>
         <CardContent sx={{ padding: (theme) => `${theme.spacing(12, 9, 7)} !important` }}>
           {/* ... (existing code) */}
+          <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+           
+            <Typography
+              variant='h6'
+              sx={{
+                ml: 3,
+                lineHeight: 1,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                fontSize: '1.5rem !important'
+              }}
+            >
+              {themeConfig.templateName}
+            </Typography>
+          </Box>
+          <Box sx={{ mb: 6 }}>
+            {/* <Typography variant='h5' sx={{ fontWeight: 600, marginBottom: 1.5 }}>
+              Welcome to {themeConfig.templateName}!
+            </Typography> */}
+            <Typography variant='body2'></Typography>
+          </Box>
           <form noValidate autoComplete='off' onSubmit={handleSubmit}>
             <TextField
               autoFocus
@@ -175,9 +202,9 @@ const LoginPage = () => {
           </form>
         </CardContent>
       </Card>
-       {/* Snackbar for success or error message */}
-       <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%', backgroundColor:'brown', color:'white' }}>
+      {/* Snackbar for success or error message */}
+      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%', backgroundColor: 'brown', color: 'white' }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

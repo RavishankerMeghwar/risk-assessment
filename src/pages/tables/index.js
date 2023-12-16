@@ -11,14 +11,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const MUITable = () => {
-  const [insuranceData, setInsuranceData] = useState([]);
-
-  useEffect(() => {
-    // Fetch data when the component mounts
-    axios.get('http://127.0.0.1:8000/api/insurance')
-      .then(response => setInsuranceData(response.data.insurances))
-      .catch(error => console.error('Error fetching data', error));
-  }, []);
   
   return (
     <Grid container spacing={6}>

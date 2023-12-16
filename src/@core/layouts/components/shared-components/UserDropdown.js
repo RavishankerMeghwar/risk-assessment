@@ -28,6 +28,7 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 }))
 
 const UserDropdown = () => {
+
   // ** States
   const [anchorEl, setAnchorEl] = useState(null)
 
@@ -40,6 +41,8 @@ const UserDropdown = () => {
 
   const handleDropdownClose = url => {
     if (url) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('identifier');
       router.push(url)
     }
     setAnchorEl(null)
@@ -94,7 +97,7 @@ const UserDropdown = () => {
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
               <Typography sx={{ fontWeight: 600 }}>{localStorage.getItem('identifier')}</Typography>
-              
+
             </Box>
           </Box>
         </Box>
@@ -105,7 +108,7 @@ const UserDropdown = () => {
             Profile
           </Box>
         </MenuItem>
-       
+
         <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose('/')}>
           <LogoutVariant sx={{ marginRight: 2, fontSize: '1.375rem', color: 'text.secondary' }} />
           Logout

@@ -21,10 +21,11 @@ const DevicesTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [DeviceData, setDeviceData] = useState([]);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     // Fetch data from Laravel API
-    axios.get('http://127.0.0.1:8000/api/medicaldevices/')
+    axios.get(`${apiUrl}/medicaldevices/`)
       .then(response => setDeviceData(response.data))
       .catch(error => console.error('Error fetching data from Laravel API', error));
   }, []);
