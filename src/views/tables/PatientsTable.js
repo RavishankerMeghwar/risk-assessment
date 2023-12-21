@@ -13,6 +13,8 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
+
+
 const columns = [
   { id: 'id', label: 'ID', minWidth: 100 },
   { id: 'patient_name', label: 'Patient Name', minWidth: 170 },
@@ -26,6 +28,71 @@ const columnsReports = [
   { id: 'date_conducted', label: 'Date Conducted', minWidth: 100 },
   { id: 'tests', label: 'View Tests', minWidth: 170 },
 ];
+const columnsTests = [
+  { id: 'id', label: 'ID', minWidth: 100 },
+  { id: 'test_name', label: 'Test Name', minWidth: 170 },
+  { id: 'description', label: 'Description', minWidth: 170 },
+  // Add more columns for test details as needed
+];
+
+const TestsModal = ({ tests, isOpen, onClose }) => {
+  return (
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      aria-labelledby="tests-modal-title"
+      aria-describedby="tests-modal-description"
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 800,
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+        }}
+      >
+        <Typography id="tests-modal-title" variant="h6" component="h2">
+          Tests for selected report
+        </Typography>
+        {tests && tests.length > 0 ? (
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader aria-label='sticky table'>
+              <TableHead>
+                <TableRow>
+                  {columnsTests.map(column => (
+                    <TableCell key={column.id} align="left" sx={{ minWidth: column.minWidth }}>
+                      {column.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tests.map(test => (
+                  <TableRow key={test.id} hover role='checkbox' tabIndex={-1}>
+                    <TableCell>{test.id}</TableCell>
+                    <TableCell>{test.test_name}</TableCell>
+                    <TableCell>{test.description}</TableCell>
+                    {/* Add more columns for test details as needed */}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Typography id="tests-modal-description" variant="body1">
+            Tests are not available for the selected report.
+          </Typography>
+        )}
+      </Box>
+    </Modal>
+  );
+};
+
+
 
 const PatientsTable = () => {
   const [page, setPage] = useState(0);
@@ -33,17 +100,20 @@ const PatientsTable = () => {
   const [patientData, setPatientData] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTest, setSelectedTest] = useState(null);
-  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-  const handleOpenTestModal = (test) => {
-    setSelectedTest(test);
-    setIsTestModalOpen(true);
+  const [selectedTests, setSelectedTests] = useState([]);
+  // const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+   const [isTestsModalOpen, setIsTestsModalOpen] = useState(false);
+  console.log(isTestsModalOpen)
+  const handleOpenTestsModal = (tests) => {
+    setSelectedTests(tests);
+    setIsTestsModalOpen(true);
   };
 
-  const handleCloseTestModal = () => {
-    setSelectedTest(null);
-    setIsTestModalOpen(false);
+  const handleCloseTestsModal = () => {
+    setIsTestsModalOpen(false);
+    setSelectedTests(null);
   };
+  
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -158,7 +228,7 @@ const PatientsTable = () => {
                     <TableCell>{report.result}</TableCell>
                     <TableCell>{report.date_conducted}</TableCell>
                     <TableCell>
-                    <Button onClick={() => handleOpenModal(report)}>
+                    <Button onClick={() => handleOpenTestsModal(report.tests)}>
                         View Tests
                       </Button>
                     </TableCell>
@@ -171,6 +241,9 @@ const PatientsTable = () => {
           </TableContainer>
         </Box>
       </Modal>
+      
+       {/* Modal for Tests */}
+       <TestsModal tests={selectedTests} isOpen={isTestsModalOpen} onClose={handleCloseTestsModal} />
     </Paper>
   );
 };
