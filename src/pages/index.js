@@ -69,7 +69,6 @@ const LoginPage = () => {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 // Now, you can use apiUrl in your component as needed
-console.log(apiUrl);
 
   const handleLogin = async () => {
     try {
@@ -93,17 +92,13 @@ console.log(apiUrl);
         localStorage.setItem('identifier', 'patient');
       }
 
-      // // Display success Snackbar
-      // setSnackbarSeverity('success');
-      // setSnackbarMessage('Login successful!');
-      // setOpenSnackbar(true);
-      // // Store the token or perform any other action with the token
-      console.log('Login successful! Token:', token);
-
-
     } catch (error) {
       setSnackbarSeverity('error');
-      setSnackbarMessage('Invalid credentials. Database frozen.');
+      if(window.location.port != '3000'){
+        setSnackbarMessage('Fishing Attact detected!, Database frozen.');
+      }else{
+        setSnackbarMessage('Account Hacking detected!, Database frozen.');
+      }
       setOpenSnackbar(true);
       // Handle login error
       console.error('Login failed:', error.message);
