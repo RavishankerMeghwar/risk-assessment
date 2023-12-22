@@ -95,7 +95,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     } catch (error) {
       setSnackbarSeverity('error');
       if(window.location.port != '3000'){
-        setSnackbarMessage('Fishing Attact detected!, Database frozen.');
+        setSnackbarMessage('Phishing Attact detected!, Database frozen.');
       }else{
         setSnackbarMessage('Account Hacking detected!, Database frozen.');
       }
