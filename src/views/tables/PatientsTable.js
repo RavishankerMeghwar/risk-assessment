@@ -102,8 +102,8 @@ const PatientsTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTests, setSelectedTests] = useState([]);
   // const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-   const [isTestsModalOpen, setIsTestsModalOpen] = useState(false);
-  console.log(isTestsModalOpen)
+  const [isTestsModalOpen, setIsTestsModalOpen] = useState(false);
+  console.log(selectedTests)
   const handleOpenTestsModal = (tests) => {
     setSelectedTests(tests);
     setIsTestsModalOpen(true);
@@ -113,7 +113,10 @@ const PatientsTable = () => {
     setIsTestsModalOpen(false);
     setSelectedTests(null);
   };
-  
+  // if (isTestsModalOpen == false) {
+  //   setSelectedTests(null);
+  // }
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -186,7 +189,7 @@ const PatientsTable = () => {
       />
 
       {/* Modal for Test Reports */}
-      
+
 
       <Modal
         open={isModalOpen}
@@ -221,18 +224,18 @@ const PatientsTable = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                
+
                 {selectedPatient?.test_reports && selectedPatient.test_reports.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(report => (
                   <TableRow key={report.id} hover role='checkbox' tabIndex={-1}>
                     <TableCell>{reportIndex++}</TableCell>
                     <TableCell>{report.result}</TableCell>
                     <TableCell>{report.date_conducted}</TableCell>
                     <TableCell>
-                    <Button onClick={() => handleOpenTestsModal(report.tests)}>
+                      <Button onClick={() => handleOpenTestsModal(report.tests)}>
                         View Tests
                       </Button>
                     </TableCell>
-                    
+
                   </TableRow>
                 ))}
 
@@ -241,9 +244,9 @@ const PatientsTable = () => {
           </TableContainer>
         </Box>
       </Modal>
-      
-       {/* Modal for Tests */}
-       <TestsModal tests={selectedTests} isOpen={isTestsModalOpen} onClose={handleCloseTestsModal} />
+
+      {/* Modal for Tests */}
+      <TestsModal tests={selectedTests} isOpen={isTestsModalOpen} onClose={handleCloseTestsModal} />
     </Paper>
   );
 };

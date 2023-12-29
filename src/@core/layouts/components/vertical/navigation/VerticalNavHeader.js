@@ -106,8 +106,8 @@ const VerticalNavHeader = props => {
                 </g>
               </g>
             </svg> */}
-            <HeaderTitle variant='h6' sx={{ ml: 3 }}>
-              Risk Assessment
+            <HeaderTitle variant='h6' sx={{ ml: 1,mt:4 }}>
+            S.SnP risk assessment of smart diagnosis services
             </HeaderTitle>
           </StyledLink>
         </Link>

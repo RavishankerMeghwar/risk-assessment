@@ -65,43 +65,70 @@ const LoginPage = () => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-// For example, in a component file
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-// Now, you can use apiUrl in your component as needed
 
+
+  let loginAttempts = 0;
   const handleLogin = async () => {
     try {
-      const response = await axios.post(`${apiUrl}/api/login/`, {
-        username: values.username,
-        password: values.password,
-      });
-      
+      loginAttempts = parseInt(localStorage.getItem('loginAttempts')) || 0;
+      if (loginAttempts >= 3) {
+        const lastAttemptTime = localStorage.getItem('lastAttemptTime');
+        if (lastAttemptTime) {
+          const elapsedTime = new Date().getTime() - parseInt(lastAttemptTime);
+          const hoursPassed = elapsedTime / (1000 * 60 * 60);
 
-      // Assuming the server returns a token upon successful login
-      const token = response.data.access;
-      localStorage.setItem('accessToken', token);
-      if (values.username == 'admin') {
-        localStorage.setItem('identifier', 'admin');
-        router.push('/tables/doctors');
-      } else if (values.username == 'doctor') {
-        localStorage.setItem('identifier', 'doctor');
-        router.push('/tables/patients');
-      } else if (values.username == 'patient') {
-        router.push('/tables/test-reports');
-        localStorage.setItem('identifier', 'patient');
+          if (hoursPassed < 24) {
+            setSnackbarMessage(`You have exceeded the maximum number of login attempts. Please try again after ${24 - Math.ceil(hoursPassed)} hours.`);
+            setOpenSnackbar(true);
+            return;
+          } else {
+            localStorage.setItem('loginAttempts', 0);
+          }
+        }
       }
 
+      if (values.username !== 'admin' && values.username !== 'patient' && values.username !== 'doctor') {
+        setSnackbarMessage('Invalid username and password. Please try again.');
+        setOpenSnackbar(true);
+        loginAttempts += 1;
+        localStorage.setItem('loginAttempts', loginAttempts);
+
+        if (loginAttempts >= 3) {
+          localStorage.setItem('lastAttemptTime', new Date().getTime());
+        }
+      } else {
+        const response = await axios.post(`${apiUrl}/api/login/`, {
+          username: values.username,
+          password: values.password,
+        });
+
+        const token = response.data.access;
+        localStorage.setItem('accessToken', token);
+
+        if (values.username === 'admin') {
+          localStorage.setItem('identifier', 'admin');
+          router.push('/tables/doctors');
+        } else if (values.username === 'doctor') {
+          localStorage.setItem('identifier', 'doctor');
+          router.push('/tables/patients');
+        } else if (values.username === 'patient') {
+          router.push('/tables/test-reports');
+          localStorage.setItem('identifier', 'patient');
+        }
+
+        localStorage.setItem('loginAttempts', 0);
+      }
     } catch (error) {
+      console.error('Login failed:', error.message);
       setSnackbarSeverity('error');
-      if(window.location.port != '3000'){
-        setSnackbarMessage('Fishing Attact detected!, Database frozen.');
-      }else{
+      if (window.location.port !== '3000') {
+        setSnackbarMessage('Fishing Attack detected!, Database frozen.');
+      } else {
         setSnackbarMessage('Account Hacking detected!, Database frozen.');
       }
       setOpenSnackbar(true);
-      // Handle login error
-      console.error('Login failed:', error.message);
     }
   };
 
@@ -119,7 +146,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         <CardContent sx={{ padding: (theme) => `${theme.spacing(12, 9, 7)} !important` }}>
           {/* ... (existing code) */}
           <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-           
+
             <Typography
               variant='h6'
               sx={{
