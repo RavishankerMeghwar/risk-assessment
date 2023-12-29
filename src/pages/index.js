@@ -123,9 +123,9 @@ const LoginPage = () => {
     } catch (error) {
       console.error('Login failed:', error.message);
       setSnackbarSeverity('error');
-      if (window.location.port !== '3000') {
-        setSnackbarMessage('Fishing Attack detected!, Database frozen.');
-      } else {
+      if(window.location.port != '3000'){
+        setSnackbarMessage('Phishing Attact detected!, Database frozen.');
+      }else{
         setSnackbarMessage('Account Hacking detected!, Database frozen.');
       }
       setOpenSnackbar(true);
