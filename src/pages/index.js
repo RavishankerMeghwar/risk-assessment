@@ -69,63 +69,79 @@ const LoginPage = () => {
 
 
 
+  let userData = {};
   let loginAttempts = 0;
+
   const handleLogin = async () => {
     try {
-      loginAttempts = parseInt(localStorage.getItem('loginAttempts')) || 0;
-      if (loginAttempts >= 3) {
-        const lastAttemptTime = localStorage.getItem('lastAttemptTime');
-        if (lastAttemptTime) {
-          const elapsedTime = new Date().getTime() - parseInt(lastAttemptTime);
-          const hoursPassed = elapsedTime / (1000 * 60 * 60);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        userData = JSON.parse(localStorage.getItem('userData')) || {};
+        loginAttempts = parseInt(localStorage.getItem('loginAttempts')) || 0;
+        if (userData.loginAttempts >= 3 && userData.user_name == values.username) {
+          const lastAttemptTime = userData.lastAttemptTime;
+          if (lastAttemptTime) {
+            const elapsedTime = new Date().getTime() - parseInt(lastAttemptTime);
+            const hoursPassed = elapsedTime / (1000 * 60 * 60);
 
-          if (hoursPassed < 24) {
-            setSnackbarMessage(`You have exceeded the maximum number of login attempts. Please try again after ${24 - Math.ceil(hoursPassed)} hours.`);
-            setOpenSnackbar(true);
-            return;
-          } else {
-            localStorage.setItem('loginAttempts', 0);
+            if (hoursPassed < 24) {
+              setSnackbarMessage(`You have exceeded the maximum number of login attempts. Please try again after ${24 - Math.ceil(hoursPassed)} hours.`);
+              setOpenSnackbar(true);
+              return;
+            } else {
+              // userData.loginAttempts = 0;
+              localStorage.setItem('userData', JSON.stringify(userData));
+            }
           }
         }
-      }
 
-      if (values.username !== 'admin' && values.username !== 'patient' && values.username !== 'doctor') {
-        setSnackbarMessage('Invalid username and password. Please try again.');
-        setOpenSnackbar(true);
-        loginAttempts += 1;
-        localStorage.setItem('loginAttempts', loginAttempts);
-
-        if (loginAttempts >= 3) {
-          localStorage.setItem('lastAttemptTime', new Date().getTime());
+        if (
+          (values.username === 'admin' && values.password !== 'admin') ||
+          (values.username === 'doctor' && values.password !== 'doctor') ||
+          (values.username === 'patient' && values.password !== 'patient')
+        ) {
+          setSnackbarMessage('Invalid username and password. Please try again.');
+          setOpenSnackbar(true);
+          loginAttempts = (loginAttempts + 1);
+          if (loginAttempts >= 3) {
+            userData = {
+              'loginAttempts': loginAttempts,
+              'user_name': values.username,
+              'lastAttemptTime': new Date().getTime()
+            };
+            localStorage.setItem('userData', JSON.stringify(userData));
+          }
+          localStorage.setItem('loginAttempts', loginAttempts);
+        } else {
+          const response = await axios.post(`${apiUrl}/api/login/`, {
+            username: values.username,
+            password: values.password,
+          });
+  
+          const token = response.data.access;
+          localStorage.setItem('accessToken', token);
+  
+          if (values.username === 'admin') {
+            localStorage.setItem('identifier', 'admin');
+            router.push('/tables/doctors');
+          } else if (values.username === 'doctor') {
+            localStorage.setItem('identifier', 'doctor');
+            router.push('/tables/patients');
+          } else if (values.username === 'patient') {
+            router.push('/tables/test-reports');
+            localStorage.setItem('identifier', 'patient');
+          }
+  
+          loginAttempts = 0;
+          localStorage.setItem('loginAttempts', loginAttempts);
         }
-      } else {
-        const response = await axios.post(`${apiUrl}/api/login/`, {
-          username: values.username,
-          password: values.password,
-        });
-
-        const token = response.data.access;
-        localStorage.setItem('accessToken', token);
-
-        if (values.username === 'admin') {
-          localStorage.setItem('identifier', 'admin');
-          router.push('/tables/doctors');
-        } else if (values.username === 'doctor') {
-          localStorage.setItem('identifier', 'doctor');
-          router.push('/tables/patients');
-        } else if (values.username === 'patient') {
-          router.push('/tables/test-reports');
-          localStorage.setItem('identifier', 'patient');
-        }
-
-        localStorage.setItem('loginAttempts', 0);
       }
+      
     } catch (error) {
       console.error('Login failed:', error.message);
       setSnackbarSeverity('error');
-      if(window.location.port != '3000'){
-        setSnackbarMessage('Phishing Attact detected!, Database frozen.');
-      }else{
+      if (window.location.port !== '3000') {
+        setSnackbarMessage('Phishing Attack detected!, Database frozen.');
+      } else {
         setSnackbarMessage('Account Hacking detected!, Database frozen.');
       }
       setOpenSnackbar(true);
