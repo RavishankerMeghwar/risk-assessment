@@ -70,15 +70,17 @@ const LoginPage = () => {
 
 
   let userData = {};
-  let loginAttempts = 0;
 
   const handleLogin = async () => {
     try {
       if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
         userData = JSON.parse(localStorage.getItem('userData')) || {};
-        loginAttempts = parseInt(localStorage.getItem('loginAttempts')) || 0;
-        if (userData.loginAttempts >= 3 && userData.user_name == values.username) {
-          const lastAttemptTime = userData.lastAttemptTime;
+
+        const { username, password } = values;
+
+        // Check if the user is locked
+        if (userData[username] && userData[username].loginAttempts >= 3) {
+          const lastAttemptTime = userData[username].lastAttemptTime;
           if (lastAttemptTime) {
             const elapsedTime = new Date().getTime() - parseInt(lastAttemptTime);
             const hoursPassed = elapsedTime / (1000 * 60 * 60);
@@ -88,54 +90,63 @@ const LoginPage = () => {
               setOpenSnackbar(true);
               return;
             } else {
-              // userData.loginAttempts = 0;
+              // Reset login attempts if the lock time has passed
+              userData[username].loginAttempts = 0;
               localStorage.setItem('userData', JSON.stringify(userData));
             }
           }
         }
 
+        // Check username and password
         if (
-          (values.username === 'admin' && values.password !== 'admin') ||
-          (values.username === 'doctor' && values.password !== 'doctor') ||
-          (values.username === 'patient' && values.password !== 'patient')
+          (username === 'admin' && password !== 'admin') ||
+          (username === 'doctor' && password !== 'doctor') ||
+          (username === 'patient' && password !== 'patient')
         ) {
           setSnackbarMessage('Invalid username and password. Please try again.');
           setOpenSnackbar(true);
-          loginAttempts = (loginAttempts + 1);
-          if (loginAttempts >= 3) {
-            userData = {
-              'loginAttempts': loginAttempts,
-              'user_name': values.username,
-              'lastAttemptTime': new Date().getTime()
+
+          // Increment login attempts for the user
+          if (!userData[username]) {
+            userData[username] = {
+              loginAttempts: 1,
+              lastAttemptTime: new Date().getTime(),
             };
-            localStorage.setItem('userData', JSON.stringify(userData));
+          } else {
+            userData[username].loginAttempts += 1;
           }
-          localStorage.setItem('loginAttempts', loginAttempts);
+
+          localStorage.setItem('userData', JSON.stringify(userData));
         } else {
+          // Successful login
+          // Reset login attempts for the user
+          if (userData[username]) {
+            userData[username].loginAttempts = 0;
+          }
+
           const response = await axios.post(`${apiUrl}/api/login/`, {
-            username: values.username,
-            password: values.password,
+            username: username,
+            password: password,
           });
-  
+
           const token = response.data.access;
           localStorage.setItem('accessToken', token);
-  
-          if (values.username === 'admin') {
+
+          // Handle user roles
+          if (username === 'admin') {
             localStorage.setItem('identifier', 'admin');
             router.push('/tables/doctors');
-          } else if (values.username === 'doctor') {
+          } else if (username === 'doctor') {
             localStorage.setItem('identifier', 'doctor');
             router.push('/tables/patients');
-          } else if (values.username === 'patient') {
+          } else if (username === 'patient') {
             router.push('/tables/test-reports');
             localStorage.setItem('identifier', 'patient');
           }
-  
-          loginAttempts = 0;
-          localStorage.setItem('loginAttempts', loginAttempts);
+
+          localStorage.setItem('userData', JSON.stringify(userData));
         }
       }
-      
     } catch (error) {
       console.error('Login failed:', error.message);
       setSnackbarSeverity('error');
@@ -147,6 +158,7 @@ const LoginPage = () => {
       setOpenSnackbar(true);
     }
   };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
